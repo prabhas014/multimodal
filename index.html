@@ -36,16 +36,18 @@
                 </div>
                 <div class="panel-body">
                     <div id="upload-zone" class="upload-zone">
-                        <input type="file" id="file-upload" accept="image/png, image/jpeg, application/pdf" class="hidden-input">
+                        <input type="file" id="file-upload" accept="image/png, image/jpeg, application/pdf, audio/*, video/*" class="hidden-input">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                         <p>Drag & drop document here or <strong>browse</strong></p>
-                        <span class="support-text">Supports PDF, PNG, JPG (Max 10MB)</span>
+                        <span class="support-text">Supports PDF, PNG, JPG, Audio, Video (Max 10MB)</span>
                     </div>
 
                     <div id="viewer-container" class="viewer-container hidden">
                         <div id="document-wrapper" class="document-wrapper">
                             <!-- In a real app, this img src would be dynamic. We use our mock here. -->
                             <img id="doc-image" src="Invoice_1024.png" alt="Document Preview">
+                            <video id="doc-video" controls class="hidden" style="max-width: 100%; max-height: 100%; width: 100%;"></video>
+                            <audio id="doc-audio" controls class="hidden" style="width: 100%; margin-top: 20%;"></audio>
                             <div id="bbox-container" class="bbox-container"></div>
                         </div>
                         
@@ -135,6 +137,6 @@
 
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="/script.js"></script>
 </body>
 </html>

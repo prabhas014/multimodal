@@ -1,3 +1,6 @@
+import { inject } from '@vercel/analytics';
+inject();
+
 const btnAnalyze = document.getElementById('btn-analyze');
 const btnDownload = document.getElementById('btn-download');
 const scanLine = document.getElementById('scan-line');
@@ -10,6 +13,8 @@ const uploadZone = document.getElementById('upload-zone');
 const fileUpload = document.getElementById('file-upload');
 const viewerContainer = document.getElementById('viewer-container');
 const docImage = document.getElementById('doc-image');
+const docVideo = document.getElementById('doc-video');
+const docAudio = document.getElementById('doc-audio');
 
 // File Upload Logic
 uploadZone.addEventListener('click', () => fileUpload.click());
@@ -26,13 +31,35 @@ fileUpload.addEventListener('change', (e) => {
 
 function handleFile(file) {
     logToConsole(`[INFO] Reading uploaded file: ${file.name}`);
+    
+    docImage.classList.add('hidden');
+    docVideo.classList.add('hidden');
+    docAudio.classList.add('hidden');
+    bboxContainer.innerHTML = '';
+    
     if (file.type === "application/pdf") {
         logToConsole(`[WARN] Native PDF viewing is limited. For full bounding box support, consider uploading images.`, 'warn');
+        docImage.classList.remove('hidden');
+    } else if (file.type.startsWith('video/')) {
+        logToConsole(`[INFO] Video file detected. Extracting keyframes for analysis...`, 'info');
+        docVideo.classList.remove('hidden');
+    } else if (file.type.startsWith('audio/')) {
+        logToConsole(`[INFO] Audio file detected. Transcribing speech to text...`, 'info');
+        docAudio.classList.remove('hidden');
+    } else {
+        docImage.classList.remove('hidden');
     }
     
     const reader = new FileReader();
     reader.onload = (e) => {
-        docImage.src = e.target.result;
+        if (file.type.startsWith('video/')) {
+            docVideo.src = e.target.result;
+        } else if (file.type.startsWith('audio/')) {
+            docAudio.src = e.target.result;
+        } else {
+            docImage.src = e.target.result;
+        }
+        
         uploadZone.classList.add('hidden');
         viewerContainer.classList.remove('hidden');
         logToConsole(`[SUCCESS] File loaded into viewer. Ready for analysis.`, 'success');
