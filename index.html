@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multimodal Document Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>Nexus VLM Analyzer</span>
+            </div>
+            <div class="header-actions">
+                <span class="status-badge"><span class="pulse"></span> Engine Ready</span>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <div class="workspace">
+            
+            <!-- Left Panel: Document Viewer -->
+            <div class="panel left-panel">
+                <div class="panel-header">
+                    <h3>Document Source</h3>
+                    <div class="zoom-controls">
+                        <button id="btn-zoom-out">-</button>
+                        <span id="zoom-level">100%</span>
+                        <button id="btn-zoom-in">+</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div id="upload-zone" class="upload-zone">
+                        <input type="file" id="file-upload" accept="image/png, image/jpeg, application/pdf" class="hidden-input">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p>Drag & drop document here or <strong>browse</strong></p>
+                        <span class="support-text">Supports PDF, PNG, JPG (Max 10MB)</span>
+                    </div>
+
+                    <div id="viewer-container" class="viewer-container hidden">
+                        <div id="document-wrapper" class="document-wrapper">
+                            <!-- In a real app, this img src would be dynamic. We use our mock here. -->
+                            <img id="doc-image" src="Invoice_1024.png" alt="Document Preview">
+                            <div id="bbox-container" class="bbox-container"></div>
+                        </div>
+                        
+                        <!-- Overlay for scanning animation -->
+                        <div id="scan-line" class="scan-line hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Data Viewer & Controls -->
+            <div class="panel right-panel">
+                <div class="panel-header">
+                    <h3>Extraction Pipeline</h3>
+                </div>
+                <div class="panel-body flex-col">
+                    
+                    <!-- Controls -->
+                    <div class="controls-section">
+                        <div class="input-group">
+                            <label>Target Schema</label>
+                            <select id="schema-select" class="custom-select">
+                                <option value="invoice">Invoice / Receipt</option>
+                                <option value="financial">Financial Report</option>
+                                <option value="medical">Medical Lab Results</option>
+                                <option value="custom">Custom Schema (JSON)</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Export Format</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="export-format" value="json" checked>
+                                    <span>JSON</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="export-format" value="csv">
+                                    <span>CSV Table</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="export-format" value="text">
+                                    <span>Clean Text</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button id="btn-analyze" class="btn primary full-width">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            Analyze Document
+                        </button>
+                    </div>
+
+                    <!-- Extracted Data -->
+                    <div class="data-section">
+                        <div class="data-header">
+                            <h4>Structured Output</h4>
+                            <span id="confidence-score" class="confidence hidden">Avg Confidence: 98.4%</span>
+                        </div>
+                        <div id="data-viewer" class="data-viewer empty">
+                            <div class="empty-state">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                <p>Click analyze to process document</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="btn-download" class="btn secondary full-width disabled">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Download Extracted Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Panel: Console -->
+        <div class="console-panel">
+            <div class="console-header">
+                <span>System Terminal</span>
+                <button id="btn-clear-console" class="btn-icon" title="Clear Console">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            </div>
+            <div id="console-output" class="console-output">
+                <div class="log-entry info">[SYSTEM] VLM Analyzer initialized. Ready for input.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
