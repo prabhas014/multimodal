@@ -69,7 +69,10 @@ function handleFile(file) {
         
         uploadZone.classList.add('hidden');
         viewerContainer.classList.remove('hidden');
-        logToConsole(`[SUCCESS] File loaded into viewer. Ready for analysis.`, 'success');
+        logToConsole(`[SUCCESS] File loaded into viewer. Starting analysis...`, 'success');
+        
+        // Automatically trigger analysis
+        btnAnalyze.click();
     };
     reader.readAsDataURL(file);
 }
