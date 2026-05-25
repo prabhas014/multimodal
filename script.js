@@ -59,6 +59,9 @@ function handleFile(file) {
     
     const reader = new FileReader();
     reader.onload = (e) => {
+        window.currentFileData = e.target.result;
+        window.currentFileMime = file.type;
+
         if (file.type.startsWith('video/')) {
             docVideo.src = e.target.result;
         } else if (file.type.startsWith('audio/')) {
@@ -93,56 +96,6 @@ function updateZoom() {
     document.getElementById('zoom-level').innerText = `${Math.round(zoomLevel * 100)}%`;
 }
 
-// Mock Data
-const mockExtraction = [
-    {
-        id: 'box-1',
-        key: "Company_Logo",
-        value: "[Graphic]",
-        bbox: { top: '8%', left: '10%', width: '15%', height: '12%', type: 'logo' }
-    },
-    {
-        id: 'box-2',
-        key: "Vendor_Details",
-        value: "Global Tech Supplies\n123 Innovation Dr.",
-        bbox: { top: '8%', left: '70%', width: '20%', height: '10%', type: 'text' }
-    },
-    {
-        id: 'box-3',
-        key: "Invoice_Meta",
-        value: "INV-2026-1024",
-        bbox: { top: '25%', left: '70%', width: '20%', height: '5%', type: 'text' }
-    },
-    {
-        id: 'box-4',
-        key: "Bill_To",
-        value: "Acme Corp\n456 Factory Ln.",
-        bbox: { top: '25%', left: '10%', width: '25%', height: '10%', type: 'text' }
-    },
-    {
-        id: 'box-5',
-        key: "Line_Items",
-        value: "Table (3 rows)",
-        bbox: { top: '45%', left: '10%', width: '80%', height: '25%', type: 'table' },
-        children: [
-            { id: 'box-5-1', key: "Item_1", value: "Mechanical Keyboard - 2x", bbox: { top: '50%', left: '10%', width: '80%', height: '5%', type: 'table' } },
-            { id: 'box-5-2', key: "Item_2", value: "Wireless Mouse - 1x", bbox: { top: '56%', left: '10%', width: '80%', height: '5%', type: 'table' } },
-            { id: 'box-5-3', key: "Item_3", value: "USB-C Hub - 5x", bbox: { top: '62%', left: '10%', width: '80%', height: '5%', type: 'table' } }
-        ]
-    },
-    {
-        id: 'box-6',
-        key: "Total_Tax",
-        value: "$28.50",
-        bbox: { top: '75%', left: '60%', width: '30%', height: '5%', type: 'text' }
-    },
-    {
-        id: 'box-7',
-        key: "Total_Amount",
-        value: "$345.00",
-        bbox: { top: '82%', left: '60%', width: '30%', height: '6%', type: 'text' }
-    }
-];
 
 function logToConsole(message, type = 'info') {
     const entry = document.createElement('div');
@@ -161,6 +114,11 @@ btnClearConsole.addEventListener('click', () => {
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 btnAnalyze.addEventListener('click', async () => {
+    if (!window.currentFileData) {
+        logToConsole('[ERROR] No document loaded for analysis.', 'error');
+        return;
+    }
+
     // Reset state
     bboxContainer.innerHTML = '';
     dataViewer.innerHTML = '';
@@ -172,25 +130,45 @@ btnAnalyze.addEventListener('click', async () => {
     btnAnalyze.innerHTML = `<span class="pulse"></span> Analyzing...`;
     scanLine.classList.remove('hidden');
 
-    logToConsole('[INFO] Initializing Qwen2.5-VL pipeline...');
-    await sleep(800);
-    logToConsole('[INFO] Uploading document to VLM context...');
-    await sleep(1000);
-    logToConsole('[INFO] Running visual layout parsing (Table/Text/Logo)...');
-    await sleep(1200);
-    logToConsole('[INFO] Text layer coordinates mapped successfully.');
-    await sleep(900);
-    logToConsole('[SUCCESS] JSON schema validated successfully.', 'success');
-
-    // Finish analysis
-    scanLine.classList.add('hidden');
-    btnAnalyze.disabled = false;
-    btnAnalyze.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Analyze Document`;
+    logToConsole('[INFO] Sending document to Vercel Gemini API...');
     
-    confidenceScore.classList.remove('hidden');
-    btnDownload.classList.remove('disabled');
+    try {
+        const schema = document.getElementById('schema-select').value;
+        const res = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                schema: schema,
+                fileData: window.currentFileData,
+                mimeType: window.currentFileMime
+            })
+        });
 
-    renderResults();
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Failed to analyze document');
+        }
+
+        const data = await res.json();
+        logToConsole('[SUCCESS] Analysis complete! Parsing JSON schema...', 'success');
+        
+        window.currentExtractionData = data.result;
+
+        // Finish analysis
+        scanLine.classList.add('hidden');
+        btnAnalyze.disabled = false;
+        btnAnalyze.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Analyze Document`;
+        
+        confidenceScore.classList.remove('hidden');
+        btnDownload.classList.remove('disabled');
+
+        renderResults(data.result);
+    } catch (e) {
+        scanLine.classList.add('hidden');
+        btnAnalyze.disabled = false;
+        btnAnalyze.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Analyze Document`;
+        logToConsole(`[ERROR] ${e.message}`, 'error');
+    }
 });
 
 function createJsonNode(data, level = 0) {
@@ -217,18 +195,22 @@ function createJsonNode(data, level = 0) {
     return wrapper;
 }
 
-function renderResults() {
+function renderResults(extractionData) {
     // Render JSON structure
     const rootBlock = document.createElement('div');
     rootBlock.innerHTML = `<div class="json-line">{</div>`;
     
-    mockExtraction.forEach(item => {
-        rootBlock.appendChild(createJsonNode(item, 1));
-        drawBBox(item);
-        if(item.children) {
-            item.children.forEach(child => drawBBox(child));
-        }
-    });
+    if (extractionData && Array.isArray(extractionData)) {
+        extractionData.forEach(item => {
+            rootBlock.appendChild(createJsonNode(item, 1));
+            if (item.bbox) drawBBox(item);
+            if(item.children) {
+                item.children.forEach(child => {
+                    if (child.bbox) drawBBox(child);
+                });
+            }
+        });
+    }
 
     rootBlock.innerHTML += `<div class="json-line">}</div>`;
     dataViewer.appendChild(rootBlock);
@@ -281,15 +263,17 @@ btnDownload.addEventListener('click', () => {
     
     logToConsole('[INFO] Preparing extraction export...', 'info');
     
-    // Create a mock JSON payload
+    // Create a mock JSON payload from real data
     const payload = {};
-    mockExtraction.forEach(item => {
-        if (item.children) {
-            payload[item.key] = item.children.map(c => c.value);
-        } else {
-            payload[item.key] = item.value;
-        }
-    });
+    if (window.currentExtractionData && Array.isArray(window.currentExtractionData)) {
+        window.currentExtractionData.forEach(item => {
+            if (item.children) {
+                payload[item.key] = item.children.map(c => c.value);
+            } else {
+                payload[item.key] = item.value;
+            }
+        });
+    }
 
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
     const dlAnchorElem = document.createElement('a');
