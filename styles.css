@@ -90,6 +90,7 @@ body {
     display: flex;
     flex: 1;
     overflow: hidden;
+    min-height: 0;
 }
 
 .panel {
@@ -97,6 +98,7 @@ body {
     flex-direction: column;
     padding: 20px;
     height: 100%;
+    min-height: 0;
 }
 
 .left-panel {
@@ -134,6 +136,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background: var(--bg-panel);
+    min-height: 0;
 }
 
 .flex-col {
@@ -378,6 +381,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 0;
 }
 
 .data-header {
