@@ -16,10 +16,15 @@ const docImage = document.getElementById('doc-image');
 const docVideo = document.getElementById('doc-video');
 const docAudio = document.getElementById('doc-audio');
 
+// Prevent default drag behaviors globally to avoid accidental file opening
+window.addEventListener('dragover', (e) => e.preventDefault());
+window.addEventListener('drop', (e) => e.preventDefault());
+
 // File Upload Logic
 uploadZone.addEventListener('click', () => fileUpload.click());
+uploadZone.addEventListener('dragenter', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('dragleave', (e) => { e.preventDefault(); uploadZone.classList.remove('dragover'); });
 uploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
     uploadZone.classList.remove('dragover');
