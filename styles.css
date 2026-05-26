@@ -462,6 +462,20 @@ body {
 }
 
 .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+    gap: 12px;
+}
+
+#btn-download {
+    margin: 20px;
+    margin-top: 0;
+}
+
 .console-panel {
     height: 150px;
     background: #000;
