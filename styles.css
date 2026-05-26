@@ -102,13 +102,13 @@ body {
 }
 
 .left-panel {
-    flex: 4;
+    flex: 1;
     border-right: 1px solid var(--border-color);
     background: #0b1121;
 }
 
 .right-panel {
-    flex: 6;
+    flex: 3;
     background: var(--bg-dark);
     min-width: 350px;
 }
