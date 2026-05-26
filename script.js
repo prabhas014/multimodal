@@ -13,6 +13,15 @@ const viewerContainer = document.getElementById('viewer-container');
 const docImage = document.getElementById('doc-image');
 const docVideo = document.getElementById('doc-video');
 const docAudio = document.getElementById('doc-audio');
+const apiKeyInput = document.getElementById('api-key-input');
+
+// Load API key from local storage
+if (localStorage.getItem('geminiApiKey')) {
+    apiKeyInput.value = localStorage.getItem('geminiApiKey');
+}
+apiKeyInput.addEventListener('change', (e) => {
+    localStorage.setItem('geminiApiKey', e.target.value.trim());
+});
 
 // Prevent default drag behaviors globally to avoid accidental file opening
 window.addEventListener('dragover', (e) => e.preventDefault());
@@ -132,6 +141,7 @@ btnAnalyze.addEventListener('click', async () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+                apiKey: apiKeyInput.value.trim(),
                 fileData: window.currentFileData,
                 mimeType: window.currentFileMime
             })

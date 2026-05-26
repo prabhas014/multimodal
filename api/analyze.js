@@ -5,15 +5,17 @@ module.exports = async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-        return res.status(500).json({ error: 'GEMINI_API_KEY environment variable is not configured on Vercel.' });
-    }
-
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        // Expect frontend to send { apiKey?: string, fileData: string, mimeType: string }
+        const { apiKey: userApiKey, fileData, mimeType } = req.body;
         
-        // Expect frontend to send { schema: string, fileData: string, mimeType: string }
-        const { schema, fileData, mimeType } = req.body;
+        const finalApiKey = userApiKey || process.env.GEMINI_API_KEY;
+
+        if (!finalApiKey) {
+            return res.status(401).json({ error: 'Please provide a Gemini API Key in the sidebar or configure it in Vercel.' });
+        }
+
+        const ai = new GoogleGenAI({ apiKey: finalApiKey });
 
         if (!fileData || !mimeType) {
             return res.status(400).json({ error: 'Missing file data or mime type' });
