@@ -195,6 +195,7 @@ btnAnalyze.addEventListener('click', async () => {
         btnAnalyze.disabled = false;
         btnAnalyze.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Analyze Document`;
         logToConsole(`[ERROR] ${e.message}`, 'error');
+        dataViewer.innerHTML = `<div class="empty-state" style="color: #ef4444;"><p>Error: ${e.message}</p></div>`;
     }
 });
 
