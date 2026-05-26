@@ -1,4 +1,5 @@
 const { GoogleGenAI } = require('@google/genai');
+const { wrapGemini } = require('langsmith/wrappers');
 
 module.exports = async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -15,7 +16,10 @@ module.exports = async function handler(req, res) {
             return res.status(401).json({ error: 'Please provide a Gemini API Key in the sidebar or configure it in Vercel.' });
         }
 
-        const ai = new GoogleGenAI({ apiKey: finalApiKey });
+        let ai = new GoogleGenAI({ apiKey: finalApiKey });
+        if (process.env.LANGSMITH_TRACING === 'true') {
+            ai = wrapGemini(ai);
+        }
 
         if (!fileData || !mimeType) {
             return res.status(400).json({ error: 'Missing file data or mime type' });
