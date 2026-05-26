@@ -1,5 +1,4 @@
 const { GoogleGenAI } = require('@google/genai');
-const { wrapGemini } = require('langsmith/wrappers');
 
 module.exports = async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -7,25 +6,16 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-        // Expect frontend to send { apiKey?: string, langsmithApiKey?: string, fileData: string, mimeType: string }
-        const { apiKey: userApiKey, langsmithApiKey, fileData, mimeType } = req.body;
+        // Expect frontend to send { apiKey?: string, fileData: string, mimeType: string }
+        const { apiKey: userApiKey, fileData, mimeType } = req.body;
         
         const finalApiKey = userApiKey || process.env.GEMINI_API_KEY;
-        const finalLangsmithKey = langsmithApiKey || process.env.LANGSMITH_API_KEY;
-
-        if (finalLangsmithKey) {
-            process.env.LANGSMITH_API_KEY = finalLangsmithKey;
-            process.env.LANGSMITH_TRACING = 'true';
-        }
 
         if (!finalApiKey) {
             return res.status(401).json({ error: 'Please provide a Gemini API Key in the sidebar or configure it in Vercel.' });
         }
 
-        let ai = new GoogleGenAI({ apiKey: finalApiKey });
-        if (process.env.LANGSMITH_TRACING === 'true') {
-            ai = wrapGemini(ai);
-        }
+        const ai = new GoogleGenAI({ apiKey: finalApiKey });
 
         if (!fileData || !mimeType) {
             return res.status(400).json({ error: 'Missing file data or mime type' });
