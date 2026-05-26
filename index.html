@@ -71,9 +71,34 @@
                     
                     <!-- Controls -->
                     <div class="controls-section">
-                        <div class="input-group">
-                            <label>Gemini API Key (Optional)</label>
-                            <input type="password" id="api-key-input" class="custom-select" placeholder="Enter your key here..." style="font-family: monospace;">
+                        <div class="api-keys-section">
+                            <div class="config-header">
+                                <h4 style="margin: 0; font-size: 0.95rem; font-weight: 600;">Configuration</h4>
+                                <p style="margin: 4px 0 12px 0; font-size: 0.8rem; color: var(--text-muted);">Provide your API keys to get started.</p>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label style="display: flex; justify-content: space-between;">Google Gemini API Key <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></label>
+                                <div class="password-wrapper" style="position: relative;">
+                                    <input type="password" id="api-key-input" class="custom-select" placeholder="Enter your key here..." style="font-family: monospace; padding-right: 36px;">
+                                    <button type="button" class="btn-icon toggle-password" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 4px; background: transparent; border: none; color: var(--text-muted); cursor: pointer;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
+
+                            <div class="input-group">
+                                <h4 style="margin: 0 0 12px 0; font-size: 0.9rem; font-weight: 600;">LangSmith Tracing (Optional)</h4>
+                                <label style="display: flex; justify-content: space-between;">LangSmith API Key <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></label>
+                                <div class="password-wrapper" style="position: relative;">
+                                    <input type="password" id="langsmith-key-input" class="custom-select" placeholder="Enter your key here..." style="font-family: monospace; padding-right: 36px;">
+                                    <button type="button" class="btn-icon toggle-password" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 4px; background: transparent; border: none; color: var(--text-muted); cursor: pointer;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <button id="btn-analyze" class="btn primary full-width">
