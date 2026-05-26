@@ -45,7 +45,7 @@ You will be given a mix of text, tables, charts, hand-written notes, and diagram
 * Translate complex jargon into intuitive, plain-English insights without losing technical accuracy.`;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-1.5-pro',
+            model: 'gemini-1.5-flash',
             contents: [
                 {
                     role: 'user',
