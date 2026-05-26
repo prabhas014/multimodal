@@ -1,5 +1,3 @@
-import { inject } from '@vercel/analytics';
-inject();
 
 const btnAnalyze = document.getElementById('btn-analyze');
 const btnDownload = document.getElementById('btn-download');
