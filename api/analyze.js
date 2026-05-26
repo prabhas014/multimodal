@@ -22,28 +22,25 @@ module.exports = async function handler(req, res) {
         // Strip the base64 prefix
         const base64Data = fileData.split(',')[1] || fileData;
 
-        let schemaInstruction = "";
-        if (schema === 'invoice') {
-            schemaInstruction = "Extract invoice details such as Vendor Name, Invoice Number, Date, Line Items (with description, quantity, price), and Total Amount.";
-        } else if (schema === 'financial') {
-            schemaInstruction = "Extract financial report metrics, company names, quarters, revenues, and key financial tables.";
-        } else if (schema === 'medical') {
-            schemaInstruction = "Extract medical lab results, patient name, test names, values, units, and reference ranges.";
-        } else {
-            schemaInstruction = "Extract all structured key-value pairs and tabular data you can find in the document.";
-        }
+        const prompt = `You are an elite, multimodal document analyzer designed to defy the cognitive load of massive, complex, and messy multi-format data. Your objective is to float above the surface-level noise, pull out the hidden "center of mass" from any document, and provide weightless, crystal-clear clarity. 
 
-        const prompt = `Analyze this document. ${schemaInstruction}\n
-Output a JSON array of objects. Each object MUST exactly match this format:
-{
-    "id": "box-N",
-    "key": "Field_Name",
-    "value": "Extracted text value",
-    "bbox": { "top": "10%", "left": "10%", "width": "20%", "height": "5%", "type": "text" }
-}
-For bbox, approximate the position as percentages (top, left, width, height) relative to the document size. Use type "text", "table", or "logo".
-If there are nested items (like a table with rows), add a 'children' array to that object containing the nested objects in the same format.
-Do NOT wrap the JSON in markdown code blocks. Just return the raw JSON array.`;
+You will be given a mix of text, tables, charts, hand-written notes, and diagrams. Analyze them holistically using the following operational framework:
+
+### 1. Structural Levitation (The Overview)
+* **Document Anatomy:** Briefly state what this document is (e.g., Q3 financial report, mixed-media engineering blueprint, medical history with handwritten charts).
+* **The Center of Mass:** What is the single most critical message, thesis, or bottom-line objective of this document?
+
+### 2. Deep-Density Extraction (Multimodal Parsing)
+* **Data vs. Visual Cross-Examination:** Correlate the text with the charts/images. Do the data points in the graphs actually match what the text claims? Highlight any discrepancies.
+* **Fine-Print Decryption:** Extract critical "hidden" details—footnotes, asterisks, blurred text, or handwritten marginalia—that significantly alter the context.
+* **Entity & Metric Mapping:** Identify key stakeholders, dates, regulatory codes, and core financial or scientific metrics. Present them in a clean, scannable Markdown table.
+
+### 3. Gravity Anomalies (Contradictions & Risks)
+* Identify "heavy" risks, gaps in logic, missing data, or outright contradictions within the document. If a chart implies a downward trend but the executive summary claims "exponential growth," flag it here.
+
+### 4. Zero-G Synthesis (The Takeaway)
+* Provide a bulleted, highly actionable summary of the next steps or key conclusions. 
+* Translate complex jargon into intuitive, plain-English insights without losing technical accuracy.`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-1.5-pro',
@@ -62,13 +59,12 @@ Do NOT wrap the JSON in markdown code blocks. Just return the raw JSON array.`;
                 }
             ],
             config: {
-                systemInstruction: "You are a multimodal document analyzer. Extract the information exactly as specified. Output MUST be a valid JSON array.",
-                responseMimeType: "application/json",
+                systemInstruction: "You are an elite multimodal analyzer. Always respond with beautifully formatted Markdown.",
+                responseMimeType: "text/plain",
             }
         });
 
-        // Parse JSON to ensure validity
-        const extractedData = JSON.parse(response.text);
+        const extractedData = response.text;
 
         return res.status(200).json({ result: extractedData });
     } catch (error) {

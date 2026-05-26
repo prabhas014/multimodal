@@ -407,38 +407,53 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
-    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-main);
+}
+
+.data-viewer h1, .data-viewer h2, .data-viewer h3 {
+    color: var(--accent-blue);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.data-viewer h1 { font-size: 1.4rem; }
+.data-viewer h2 { font-size: 1.2rem; }
+.data-viewer h3 { font-size: 1.05rem; }
+
+.data-viewer ul, .data-viewer ol {
+    margin-left: 20px;
+    margin-bottom: 1em;
+}
+
+.data-viewer p {
+    margin-bottom: 1em;
+}
+
+.data-viewer strong {
+    color: #fff;
+}
+
+.data-viewer table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
     font-size: 0.85rem;
 }
 
+.data-viewer th, .data-viewer td {
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.data-viewer th {
+    background: rgba(0,0,0,0.2);
+    color: var(--accent-blue);
+}
+
 .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-muted);
-    gap: 12px;
-}
-
-/* JSON tree styling */
-.json-line {
-    padding: 4px 8px;
-    border-radius: 4px;
-    margin-bottom: 2px;
-    cursor: pointer;
-    transition: background 0.1s;
-    display: flex;
-}
-.json-line:hover, .json-line.highlight {
-    background: rgba(255, 255, 255, 0.1);
-}
-.json-key { color: #7dd3fc; }
-.json-val-string { color: #86efac; }
-.json-val-number { color: #fca5a5; }
-.json-indent { margin-left: 20px; }
-
-/* Console Panel */
 .console-panel {
     height: 150px;
     background: #000;

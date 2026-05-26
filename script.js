@@ -133,12 +133,10 @@ btnAnalyze.addEventListener('click', async () => {
     logToConsole('[INFO] Sending document to Vercel Gemini API...');
     
     try {
-        const schema = document.getElementById('schema-select').value;
         const res = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                schema: schema,
                 fileData: window.currentFileData,
                 mimeType: window.currentFileMime
             })
@@ -150,7 +148,7 @@ btnAnalyze.addEventListener('click', async () => {
         }
 
         const data = await res.json();
-        logToConsole('[SUCCESS] Analysis complete! Parsing JSON schema...', 'success');
+        logToConsole('[SUCCESS] Analysis complete! Generating report...', 'success');
         
         window.currentExtractionData = data.result;
 
@@ -171,114 +169,26 @@ btnAnalyze.addEventListener('click', async () => {
     }
 });
 
-function createJsonNode(data, level = 0) {
-    const wrapper = document.createElement('div');
-    
-    const line = document.createElement('div');
-    line.className = 'json-line';
-    line.style.marginLeft = `${level * 20}px`;
-    
-    // Highlighting logic
-    line.addEventListener('mouseenter', () => highlightBox(data.id, true));
-    line.addEventListener('mouseleave', () => highlightBox(data.id, false));
-    line.dataset.boxId = data.id;
-
-    line.innerHTML = `<span class="json-key">"${data.key}"</span>: <span class="json-val-string">"${data.value.replace(/\n/g, ' ')}"</span>${data.children ? ',' : ''}`;
-    wrapper.appendChild(line);
-
-    if (data.children) {
-        data.children.forEach(child => {
-            wrapper.appendChild(createJsonNode(child, level + 1));
-        });
-    }
-
-    return wrapper;
-}
-
-function renderResults(extractionData) {
-    // Render JSON structure
-    const rootBlock = document.createElement('div');
-    rootBlock.innerHTML = `<div class="json-line">{</div>`;
-    
-    if (extractionData && Array.isArray(extractionData)) {
-        extractionData.forEach(item => {
-            rootBlock.appendChild(createJsonNode(item, 1));
-            if (item.bbox) drawBBox(item);
-            if(item.children) {
-                item.children.forEach(child => {
-                    if (child.bbox) drawBBox(child);
-                });
-            }
-        });
-    }
-
-    rootBlock.innerHTML += `<div class="json-line">}</div>`;
-    dataViewer.appendChild(rootBlock);
-
-    // Fade in boxes
-    setTimeout(() => {
-        document.querySelectorAll('.bbox').forEach(b => b.classList.add('visible'));
-    }, 100);
-}
-
-function drawBBox(data) {
-    const box = document.createElement('div');
-    box.className = `bbox type-${data.bbox.type}`;
-    box.id = `bbox-${data.id}`;
-    
-    box.style.top = data.bbox.top;
-    box.style.left = data.bbox.left;
-    box.style.width = data.bbox.width;
-    box.style.height = data.bbox.height;
-
-    // Inverse highlight logic
-    box.addEventListener('mouseenter', () => highlightJson(data.id, true));
-    box.addEventListener('mouseleave', () => highlightJson(data.id, false));
-
-    bboxContainer.appendChild(box);
-}
-
-function highlightBox(id, activate) {
-    const box = document.getElementById(`bbox-${id}`);
-    if (box) {
-        if (activate) box.classList.add('highlight');
-        else box.classList.remove('highlight');
+function renderResults(markdownData) {
+    if (markdownData) {
+        dataViewer.innerHTML = marked.parse(markdownData);
+    } else {
+        dataViewer.innerHTML = `<div class="empty-state"><p>No data extracted.</p></div>`;
     }
 }
 
-function highlightJson(id, activate) {
-    const line = document.querySelector(`.json-line[data-box-id="${id}"]`);
-    if (line) {
-        if (activate) line.classList.add('highlight');
-        else line.classList.remove('highlight');
-        
-        // ensure visibility
-        if(activate) line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-}
+// BBox logic has been removed as the new prompt focuses on holistic markdown reporting.
 
 // Download action
 btnDownload.addEventListener('click', () => {
     if (btnDownload.classList.contains('disabled')) return;
     
-    logToConsole('[INFO] Preparing extraction export...', 'info');
+    logToConsole('[INFO] Preparing report export...', 'info');
     
-    // Create a mock JSON payload from real data
-    const payload = {};
-    if (window.currentExtractionData && Array.isArray(window.currentExtractionData)) {
-        window.currentExtractionData.forEach(item => {
-            if (item.children) {
-                payload[item.key] = item.children.map(c => c.value);
-            } else {
-                payload[item.key] = item.value;
-            }
-        });
-    }
-
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+    const dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(window.currentExtractionData || "No data");
     const dlAnchorElem = document.createElement('a');
     dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "extracted_document.json");
+    dlAnchorElem.setAttribute("download", "Nexus_Analysis_Report.md");
     dlAnchorElem.click();
     
     logToConsole('[SUCCESS] Data exported successfully.', 'success');
