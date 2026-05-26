@@ -2,11 +2,9 @@
 const btnAnalyze = document.getElementById('btn-analyze');
 const btnDownload = document.getElementById('btn-download');
 const scanLine = document.getElementById('scan-line');
-const consoleOutput = document.getElementById('console-output');
 const dataViewer = document.getElementById('data-viewer');
 const bboxContainer = document.getElementById('bbox-container');
 const confidenceScore = document.getElementById('confidence-score');
-const btnClearConsole = document.getElementById('btn-clear-console');
 const uploadZone = document.getElementById('upload-zone');
 const fileUpload = document.getElementById('file-upload');
 const viewerContainer = document.getElementById('viewer-container');
@@ -102,17 +100,12 @@ function updateZoom() {
 
 
 function logToConsole(message, type = 'info') {
-    const entry = document.createElement('div');
-    entry.className = `log-entry ${type}`;
     const timestamp = new Date().toLocaleTimeString();
-    entry.innerText = `[${timestamp}] ${message}`;
-    consoleOutput.appendChild(entry);
-    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    const formattedMessage = `[${timestamp}] ${message}`;
+    if (type === 'error') console.error(formattedMessage);
+    else if (type === 'warn') console.warn(formattedMessage);
+    else console.log(formattedMessage);
 }
-
-btnClearConsole.addEventListener('click', () => {
-    consoleOutput.innerHTML = '';
-});
 
 // Sleep helper
 const sleep = ms => new Promise(r => setTimeout(r, ms));
