@@ -155,6 +155,14 @@ btnAnalyze.addEventListener('click', async () => {
         const data = await res.json();
         logToConsole('[SUCCESS] Analysis complete! Generating report...', 'success');
         
+        if (!data.result) {
+            logToConsole(`[WARN] Received empty or undefined result from server.`, 'warn');
+        } else if (data.result === "No data returned from AI.") {
+            logToConsole(`[WARN] The AI did not return any text. Model might be blocked.`, 'warn');
+        } else {
+            logToConsole(`[INFO] Received ${data.result.length} characters of markdown.`);
+        }
+        
         window.currentExtractionData = data.result;
 
         // Finish analysis

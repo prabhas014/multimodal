@@ -66,9 +66,20 @@ You will be given a mix of text, tables, charts, hand-written notes, and diagram
             }
         });
 
-        const extractedData = response.text;
+        let extractedData = response.text;
+        
+        if (!extractedData && response.candidates && response.candidates.length > 0) {
+            console.log("response.text was undefined, extracting manually...");
+            const parts = response.candidates[0].content?.parts;
+            if (parts) {
+                extractedData = parts.map(p => p.text).join('\n');
+            }
+        }
 
-        return res.status(200).json({ result: extractedData });
+        console.log("Extracted Data Preview:", String(extractedData).substring(0, 100));
+        
+        // Ensure we always return a string to the frontend, even if empty
+        return res.status(200).json({ result: extractedData || "No data returned from AI." });
     } catch (error) {
         console.error("API Error:", error);
         return res.status(500).json({ error: error.message || 'Failed to process document' });
